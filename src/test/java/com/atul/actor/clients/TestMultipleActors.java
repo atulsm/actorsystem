@@ -16,19 +16,19 @@ public class TestMultipleActors extends TestCase {
 	@Test
 	public void testPrintActorSendEvents() throws InterruptedException {
 		PrintActor printActor = new PrintActor();
-		if(!ActorSystem.INSTANCE.isRegistered(printActor.getName())) {
-			ActorSystem.INSTANCE.registerActor(printActor);
+		if(!ActorSystem.getInstance().isRegistered(printActor.getName())) {
+			ActorSystem.getInstance().registerActor(printActor);
 		}
 		
-		boolean status = ActorSystem.INSTANCE.sendMessage(printActor.getName(), "Testing message printing");
+		boolean status = ActorSystem.getInstance().sendMessage(printActor.getName(), "Testing message printing");
 		assertEquals(true, status);
 		
 		SendMailActor emailActor = new SendMailActor("atulsm@gmail.com");
-		if(!ActorSystem.INSTANCE.isRegistered(emailActor.getName())) {
-			ActorSystem.INSTANCE.registerActor(emailActor);
+		if(!ActorSystem.getInstance().isRegistered(emailActor.getName())) {
+			ActorSystem.getInstance().registerActor(emailActor);
 		}
 		
-		status = ActorSystem.INSTANCE.sendMessage(emailActor.getName(), "Email Body");
+		status = ActorSystem.getInstance().sendMessage(emailActor.getName(), "Email Body");
 		assertEquals(true, status);		
 	}
 	

@@ -23,12 +23,22 @@ public final class ActorSystem {
 	private AtomicBoolean isShuttingDown = new AtomicBoolean(false);
 	private final ActorScheduler scheduler;
 	
-	public static final ActorSystem INSTANCE = new ActorSystem();
-	private ActorSystem() {
-		scheduler = new RoundRobinExecutor();
+	public static ActorSystem instance;
+    public static synchronized ActorSystem getInstance() {
+    	return getInstance(new RoundRobinExecutor());
+    }
+    
+    public static synchronized ActorSystem getInstance(ActorScheduler scheduler) {
+        if (instance == null) {
+            instance = new ActorSystem(scheduler);
+        }
+        return instance;
+    }
+    
+	private ActorSystem(ActorScheduler scheduler) {
+		this.scheduler = scheduler;
 		scheduler.init();
 	}
-
 	
 	/**
 	 * Register a new Actor

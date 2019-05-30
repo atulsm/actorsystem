@@ -16,18 +16,18 @@ public class TestInterActorProcessing extends TestCase {
 	@Test
 	public void testSendMailActorSendEvents() throws InterruptedException {
 		InterActorProcessing interActor = new InterActorProcessing("atulsm@gmail.com");
-		if(!ActorSystem.INSTANCE.isRegistered(interActor.getName())) {
-			ActorSystem.INSTANCE.registerActor(interActor);
+		if(!ActorSystem.getInstance().isRegistered(interActor.getName())) {
+			ActorSystem.getInstance().registerActor(interActor);
 		}
 		
-		boolean status = ActorSystem.INSTANCE.sendMessage(interActor.getName(), "Email Body");
+		boolean status = ActorSystem.getInstance().sendMessage(interActor.getName(), "Email Body");
 		assertEquals(true, status);		
 		
 	}
 	
 	@Override
 	protected void tearDown() throws Exception {
-		ActorSystem.INSTANCE.shutdown();
+		ActorSystem.getInstance().shutdown();
 	}
 	
 }

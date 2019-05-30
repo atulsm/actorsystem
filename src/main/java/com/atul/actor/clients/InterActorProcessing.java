@@ -15,7 +15,7 @@ public final class InterActorProcessing implements Actor {
 	
 	public InterActorProcessing(String email) {
 		this.email = email;
-		ActorSystem.INSTANCE.registerActor(new PrintActor());
+		ActorSystem.getInstance().registerActor(new PrintActor());
 	}
 	
 	@Override
@@ -26,7 +26,7 @@ public final class InterActorProcessing implements Actor {
 	@Override
 	public String execute(String message) {
 		System.out.println("Sending email to " + email);
-		ActorSystem.INSTANCE.sendMessage(PrintActor.NAME, "Email sending successful");
+		ActorSystem.getInstance().sendMessage(PrintActor.NAME, "Email sending successful");
 		return null;
 	}
 

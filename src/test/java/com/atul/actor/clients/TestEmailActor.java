@@ -16,11 +16,11 @@ public class TestEmailActor extends TestCase {
 	@Test
 	public void testSendMailActorSendEvents() throws InterruptedException {
 		SendMailActor emailActor = new SendMailActor("atulsm@gmail.com");
-		if(!ActorSystem.INSTANCE.isRegistered(emailActor.getName())) {
-			ActorSystem.INSTANCE.registerActor(emailActor);
+		if(!ActorSystem.getInstance().isRegistered(emailActor.getName())) {
+			ActorSystem.getInstance().registerActor(emailActor);
 		}
 		
-		boolean status = ActorSystem.INSTANCE.sendMessage(emailActor.getName(), "Email Body");
+		boolean status = ActorSystem.getInstance().sendMessage(emailActor.getName(), "Email Body");
 		assertEquals(true, status);
 	}
 	
@@ -28,12 +28,12 @@ public class TestEmailActor extends TestCase {
 	@Test
 	public void testSendMailActorSendEvetsSSequence() throws InterruptedException {
 		SendMailActor emailActor = new SendMailActor("atulsm@gmail.com");
-		if(!ActorSystem.INSTANCE.isRegistered(emailActor.getName())) {
-			ActorSystem.INSTANCE.registerActor(emailActor);
+		if(!ActorSystem.getInstance().isRegistered(emailActor.getName())) {
+			ActorSystem.getInstance().registerActor(emailActor);
 		}
 		
 		for(int i=0;i<5;i++) {
-			boolean status = ActorSystem.INSTANCE.sendMessage(emailActor.getName(), "EmailBody " + i);
+			boolean status = ActorSystem.getInstance().sendMessage(emailActor.getName(), "EmailBody " + i);
 			assertEquals(true, status);
 		}	
 	}

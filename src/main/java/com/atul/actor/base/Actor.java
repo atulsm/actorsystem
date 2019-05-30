@@ -1,7 +1,7 @@
 package com.atul.actor.base;
 
 /**
- * The ator interface which clients have to consume
+ * The actor interface which clients have to consume
  * @author SAtul
  *
  */
