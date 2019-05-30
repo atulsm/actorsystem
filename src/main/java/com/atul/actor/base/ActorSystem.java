@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public final class ActorSystem {	
-	private static final int INDIVIDUAL_QUEUE_CAPACITY = 10;
+	private static final int INDIVIDUAL_QUEUE_CAPACITY = 1000;
 	
 	private static Map<String, ActorContext> actorQueue = new HashMap<String, ActorContext>();
 
