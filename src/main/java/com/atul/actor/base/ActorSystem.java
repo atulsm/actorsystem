@@ -5,23 +5,28 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The base system for the actor framework
+ * @author SAtul
+ *
+ */
 public final class ActorSystem {	
 	private static final int INDIVIDUAL_QUEUE_CAPACITY = 10;
 	
 	private static Map<String, ActorContext> actorQueue = new HashMap<String, ActorContext>();
-	private static ScheduledExecutorService schedulerExecutor = Executors.newScheduledThreadPool(1);
 
 	private AtomicBoolean isShuttingDown = new AtomicBoolean(false);
+	private final ActorScheduler scheduler;
 	
 	public static final ActorSystem INSTANCE = new ActorSystem();
 	private ActorSystem() {
-		schedulerExecutor.scheduleWithFixedDelay(new RoundRobinExecutor(), 0, 1, TimeUnit.MILLISECONDS);
+		scheduler = new RoundRobinExecutor();
+		scheduler.init();
 	}
 
 	
@@ -50,6 +55,10 @@ public final class ActorSystem {
 		return actorQueue.containsKey(name);
 	}
 	
+	/**
+	 * Shuting down. After shutdown nothing can be send
+	 * @return
+	 */
 	public boolean shutdown() {
 		System.out.println("Received message to shutdown");
 		
@@ -60,7 +69,7 @@ public final class ActorSystem {
 		}
 		
 		isShuttingDown.set(true);
-		schedulerExecutor.shutdown();
+		scheduler.shutdown();
 		
 		System.out.println("Shutting down");
 		return true;
@@ -76,6 +85,11 @@ public final class ActorSystem {
 	 * @return
 	 */
 	public boolean sendMessage(String actorName, String payload) {
+		if(isShuttingDown.get()) {
+			System.out.println("System has already shutdown. Cannot accept new events");
+			return false;
+		}
+		
 		if(!actorQueue.containsKey(actorName)) {
 			System.out.println("This actor is not registered yet : " + actorName);
 			return false;
@@ -127,10 +141,37 @@ public final class ActorSystem {
 	 * @author SAtul
 	 *
 	 */
-	private static final class RoundRobinExecutor implements Runnable {
-		AtomicInteger execCounts = new AtomicInteger(0);
+	private static final class RoundRobinExecutor implements ActorScheduler {
+		private AtomicInteger execCounts = new AtomicInteger(0);
+		private ExecutorService rrExecutor = Executors.newFixedThreadPool(10);
+		private Thread scheduleRunner;
 		
-		public void run() {
+		public void init() {
+			scheduleRunner = new Thread() {
+				@Override
+				public void run() {
+					while(true) {
+						int exec = execute();
+						if(exec == 0) {
+							try {
+								//Nothing was executed in the last step. Wait sometime
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								//Nothing to do since its shuting down
+							}
+						}
+					}
+				}
+			};
+			scheduleRunner.start();
+		}
+		
+		public void shutdown() {
+			scheduleRunner.interrupt();
+			rrExecutor.shutdown();
+		}
+		
+		public int execute() {
 			execCounts.set(0);
 			
 			for(Entry<String, ActorContext> entry : actorQueue.entrySet()) {
@@ -143,10 +184,11 @@ public final class ActorSystem {
 					continue;
 				}else {
 					System.out.print("Processing message for actor (" + name + "): ");
-					context.getActor().execute(message);
+					rrExecutor.execute(() -> context.getActor().execute(message));
 					execCounts.incrementAndGet();
 				}
 			}
+			return execCounts.get();
 		}
 	}
 }

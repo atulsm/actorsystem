@@ -22,6 +22,12 @@ public class TestInterActorProcessing extends TestCase {
 		
 		boolean status = ActorSystem.INSTANCE.sendMessage(interActor.getName(), "Email Body");
 		assertEquals(true, status);		
+		
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		ActorSystem.INSTANCE.shutdown();
 	}
 	
 }
